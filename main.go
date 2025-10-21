@@ -23,28 +23,7 @@ func main() {
 	flag.Parse()                                                                // 解析命令行参数
 
 	// 解析标题级别范围
-	levelParts := strings.Split(*levels, "-")
-	minLevel, maxLevel := 1, 6 // 默认标题级别范围
-	if len(levelParts) == 2 {
-		if l, err := strconv.Atoi(levelParts[0]); err == nil {
-			if l > 6 {
-				minLevel = 1
-			} else {
-				minLevel = l
-			}
-		}
-		if l, err := strconv.Atoi(levelParts[1]); err == nil {
-			if l > 6 || l == 1 {
-				maxLevel = 6
-			} else {
-				maxLevel = l
-			}
-		}
-		if minLevel >= maxLevel {
-			minLevel = 1
-			maxLevel = 6
-		}
-	}
+	minLevel, maxLevel := parseLevelRange(*levels)
 
 	fName := *inputFile
 	if _, err := os.Stat(fName); os.IsNotExist(err) {
@@ -156,4 +135,30 @@ func main() {
 	if *modifyTitle {
 		fmt.Println("正文重复标题已自动序号化为 -2, -3，以匹配 TOC")
 	}
+}
+
+func parseLevelRange(levels string) (int, int) {
+	minLevel, maxLevel := 1, 6
+	parts := strings.Split(levels, "-")
+	if len(parts) == 2 {
+		parse := func(s string) int {
+			if l, err := strconv.Atoi(s); err == nil {
+				if l < 1 {
+					return 1
+				} else if l > 6 {
+					return 6
+				}
+				return l
+			}
+			return 1
+		}
+
+		minLevel = parse(parts[0])
+		maxLevel = parse(parts[1])
+
+		if minLevel > maxLevel {
+			minLevel, maxLevel = maxLevel, minLevel
+		}
+	}
+	return minLevel, maxLevel
 }
