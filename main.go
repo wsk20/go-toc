@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -17,13 +16,17 @@ func main() {
 	// 命令行参数定义
 	inputFile := flag.String("i", "input.md", "输入 Markdown 文件")                 // -i 指定输入文件，默认 input.md
 	outputFile := flag.String("o", "output.md", "输出 Markdown 文件")               // -o 指定输出文件，默认 output.md
-	levels := flag.String("levels", "1-6", "生成 TOC 的标题级别范围，例如 1-4")             // -levels 指定 TOC 标题级别范围
+	levels := flag.Int("levels", 6, "生成目录时包含的最大标题级别（1~6，默认6）")                  // -levels 指定生成目录的最大标题级别，例如 -levels=3 仅包含 #、##、### 标题
 	stdout := flag.Bool("stdout", false, "是否直接输出 TOC 到控制台而不写文件")                // -stdout 如果为 true，直接输出 TOC 到终端
 	modifyTitle := flag.Bool("modify-title", false, "是否修改正文重复标题，自动序号化为 -2, -3") // -modify-title 对重复标题进行自动序号化
 	flag.Parse()                                                                // 解析命令行参数
 
 	// 解析标题级别范围
-	minLevel, maxLevel := parseLevelRange(*levels)
+	minLevel := 1
+	maxLevel := min(*levels, 6)
+	if maxLevel < minLevel {
+		maxLevel = 6
+	}
 
 	fName := *inputFile
 	if _, err := os.Stat(fName); os.IsNotExist(err) {
@@ -135,30 +138,4 @@ func main() {
 	if *modifyTitle {
 		fmt.Println("正文重复标题已自动序号化为 -2, -3，以匹配 TOC")
 	}
-}
-
-func parseLevelRange(levels string) (int, int) {
-	minLevel, maxLevel := 1, 6
-	parts := strings.Split(levels, "-")
-	if len(parts) == 2 {
-		parse := func(s string) int {
-			if l, err := strconv.Atoi(s); err == nil {
-				if l < 1 {
-					return 1
-				} else if l > 6 {
-					return 6
-				}
-				return l
-			}
-			return 1
-		}
-
-		minLevel = parse(parts[0])
-		maxLevel = parse(parts[1])
-
-		if minLevel > maxLevel {
-			minLevel, maxLevel = maxLevel, minLevel
-		}
-	}
-	return minLevel, maxLevel
 }
