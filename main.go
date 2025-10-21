@@ -27,10 +27,22 @@ func main() {
 	minLevel, maxLevel := 1, 6 // 默认标题级别范围
 	if len(levelParts) == 2 {
 		if l, err := strconv.Atoi(levelParts[0]); err == nil {
-			minLevel = l
+			if l > 6 {
+				minLevel = 1
+			} else {
+				minLevel = l
+			}
 		}
 		if l, err := strconv.Atoi(levelParts[1]); err == nil {
-			maxLevel = l
+			if l > 6 || l == 1 {
+				maxLevel = 6
+			} else {
+				maxLevel = l
+			}
+		}
+		if minLevel >= maxLevel {
+			minLevel = 1
+			maxLevel = 6
 		}
 	}
 
