@@ -69,7 +69,7 @@ go-toc -i input.md -o output.md
 go-toc -i input.md -stdout
 ```
 
-3. **只生成 1~3 级标题的 TOC**
+3. **只生成 1~6 级标题的 TOC**
 
 ```bash
 go-toc -i input.md -o output.md -levels=3
